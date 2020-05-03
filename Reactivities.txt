@@ -27,6 +27,80 @@
 	cd ..
 
 	
-	
 
-	
+dotnet ef migrations add InitialCreate -p Persistence/ -s API/
+dotnet ef migrations add InitialCorret -p Persistence/ -s API/
+
+dotnet ef migrations remove -f -p Persistence/ -s API/
+
+public Guid Id { get; set; }
+public string Title { get; set; }
+public string Description { get; set; }
+public string Category { get; set; }
+public DateTime Date { get; set; }
+public string City { get; set; }
+public string Venue { get; set; }
+
+private readonly DataContext _context;
+public Handler(DataContext context)
+{
+	_context = context;
+}
+public Task<List<Activity>> Handle(Query request, CancellationToken cancellationToken)
+{
+	throw new System.NotImplementedException();
+}
+
+var activities = await _context.Activities.ToListAsync();
+return activities;
+
+private readonly IMediator _mediator;
+public ActivitiesController(IMediator mediator)
+{
+	this._mediator = mediator;
+}
+
+[HttpGet]
+public async Task<ActionResult<List<Activity>>> List()
+{
+	return await _mediator.Send(new List.Query());
+}
+
+services.AddMediatR(typeof(List.Handler).Assembly);
+
+[Route("api/[controller]")]
+[ApiController]
+
+services.AddCors(opt => 
+{
+	opt.AddPolicy("CorsPolicy", policy => 
+	{
+		policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200");
+	});
+});	
+
+public class Query : IRequest<Activity>
+{
+	public Guid Id { get; set; }
+}
+
+public class Handler : IRequestHandler<Query, Activity>
+{
+	public Handler(DataContext context)
+	{
+		_context = context;
+	}
+	public Task<Activity> Handle(Query request, CancellationToken cancellationToken)
+	{
+		var acitivty = await _context.Activities.FindAsync(request.Id);
+		return activity;
+	}
+} 
+
+[HttpGet("{id}")]
+public async Task<ActionResult<Activity>> Details(Guid id)
+{
+	return await _mediator.Send(new Details.Query{Id = id});
+}
+
+2. 10. To be continued
